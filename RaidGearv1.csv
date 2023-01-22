@@ -1,0 +1,57 @@
+Name,School,Type,Set,Damage,Pierce,Critical,Power Pip,Accuracy,Resist,Block,Health
+Malevolent Fire Cap,Fire,Hat,,33,5,132,13,6,,,747
+Dragoon's Fiery Helm,Fire,Hat,Dragoon's Fiery Set,30,5,162,13,8,,,748
+Fiery Conical Of The Nullity,Fire,Hat,,28,9,171,8,7,7,,692
+Dragoon's Shocking Helm,Storm,Hat,Dragoon's Shocking Set,28,5,176,13,8,,,761
+Fiery Robe Of The Nullity,Fire,Robe,,30,8,112,7,10,11,,1033
+Primordial Aeon Cape,Fire,Robe,,24,10,112,,7,13,105,1205
+Stormy Robe Of The Nullity,Storm,Robe,,33,6,120,8,11,10,,988
+Fractal Aeon Cape,Storm,Robe,,26,8,120,,7,12,97,1152
+Fiery Boots Of The Nullity,Fire,Boots,,34,9,130,6,5,7,,919
+Primordial Aeon Boots,Fire,Boots,,42,7,130,,4,8,134,1034
+Stormy Boots Of The Nullity,Storm,Boots,,34,8,143,6,8,7,,890
+Fractal Aeon Boots,Storm,Boots,,43,6,143,,5,8,120,1002
+Primordial Aeon Sword,Fire,Wand,,28,9,129,,,,72,
+Nullity's Fiery Blade,Fire,Wand,,22,11,129,,,,64,
+Fractal Aeon Sword,Storm,Wand,,29,9,134,,,,69,
+Nullity's Stormy Blade,Storm,Wand,,23,11,134,,,,62,
+Dragoon's Fiery Charm,Fire,Amulet,Dragoon's Fiery Set,,,,,,3,82,526
+Dragoon's Shocking Charm,Storm,Amulet,Dragoon's Shocking Set,,,,,,4,81,508
+Primordial Aeon Athame,Fire,Athame,,24,,,16,,,76,1056
+Fractal Aeon Athame,Storm,Athame,,24,,,15,,,71,1016
+Primordial Aeon Ring,Fire,Ring,,15,,98,17,,,,494
+Fractal Aeon Ring,Storm,Ring,,19,,102,17,,,,408
+Supreme Volcanic Deck,Fire,Deck,,,,53,,,,46,115
+Supreme Science Deck,Storm,Deck,,,,59,,,,40,111
+Stompy Bronto,Fire,Mount,,8,,,,,,,
+Chompy Bronto,Storm,Mount,,6,,,,,,,
+Clockwork Courser,Any,Mount,,,2,,1,,,,
+Triple Double,Any,Pet,,22,5,,,,,,
+Triple Single Mighty,Any,Pet,,25,4,,,,,,
+Triple Single Pips,Any,Pet,,22,3,,5,,,,
+Triple Single Sniper,Any,Pet,,22,3,,,9,,,
+Double Double Mighty,Any,Pet,,18,6,,,,,,
+Double Double Pips,Any,Pet,,16,5,,5,,,,
+Double Double Sniper,Any,Pet,,16,5,,,9,,,
+Double Single Mighty Pips,Any,Pet,,18,4,,6,,,,
+Double Single Mighty Sniper,Any,Pet,,18,4,,,9,,,
+Mythic Conical Of The Nullity,Myth,Hat,,27,8,178,8,7,9,,729
+Dragoon's Mythic Helm,Myth,Hat,,26,4,158,13,7,,,788
+Dreamscape Aeon Helm,Myth,Hat,,34,6,178,,5,11,78,820
+Malevolent Myth Cap,Myth,Hat,,29,5,139,13,5,,,747
+Dreamscape Aeon Cape,Myth,Robe,,26,10,113,,7,16,102,1238
+Mythic Robe Of The Nullity,Myth,Robe,,32,8,113,8,10,14,,1061
+Dreamscape Aeon Boots,Myth,Boots,,41,7,134,,4,9,128,1026
+Mythic Boots Of The Nullity,Myth,Boots,,33,9,134,6,6,8,,912
+Dreamscape Aeon Wand,Myth,Wand,,26,8,139,,,,71,
+Nullity's Mythic Blade,Myth,Wand,,21,10,139,,,,63,
+Dreamscape Aeon Athame,Myth,Athame,,23,,,16,,,74,1076
+Dragoon's Mythic Charm,Myth,Amulet,,,,,,,5,84,526
+Dreamscape Aeon Ring,Myth,Ring,,18,,93,17,,,,471
+Supreme Ferocious Deck,Myth,Deck,,,,62,,,,,115
+Charon's Ferry,Myth,Mount,,1,3,,,,,,
+Trompy Bronto,Myth,Mount,,6,,,,,,,
+Stompy Bronto,Any,Mount,,5,,,,,,,
+Shane Amulet,Any,Amulet,,,4,35,,,4,,215
+Stygian Ferry,Storm,Mount,,1,2,,,,,,
+Eternal Storm Athame,Storm,Athame,,20,,,19,,,82,1129
