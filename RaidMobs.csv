@@ -1,0 +1,16 @@
+Name,Minion,Universal Block,Universal Resist,Universal Critical,Universal Damage,Storm Resist,Fire Resist,Ice Resist,Balance Resist,Myth Resist,Death Resist,Life Resist
+Moosetaur Bandit,TRUE,193,60,191,105,,,,,,,
+Grimtusk Bandit,TRUE,350,80,350,150,,,-30,,-30,,
+Djinn Bandit,TRUE,250,80,450,160,-30,,,,,,-30
+Yeti Bandit,TRUE,243,80,169,100,,-30,,,-30,,
+Forest Demon,TRUE,450,80,250,140,-30,,,,,-30,
+Stingtail Bandit,TRUE,250,80,450,160,,-30,,,,,-30
+Stormasaur Bandit,TRUE,141,80,266,115,,,-30,,,-30,
+Big Cat Burglar,FALSE,450,70,450,150,,-30,30,,,30,-30
+Honeycomb Horror,FALSE,350,70,350,130,30,,-30,,-30,,30
+Phlegmtasm,FALSE,500,70,450,150,-30,,30,,30,,-30
+Gobblorian Bandit,FALSE,450,70,500,150,,30,-30,,,-30,30
+Unfun Guy,FALSE,475,70,475,150,,,,,,,
+The Nullity,FALSE,375,50,500,200,,,,,,,
+Thundering Elf,FALSE,400,85,450,145,,,-30,,,-30,
+The Nullity No Shrike,FALSE,375,100,500,200,,,,,,,
