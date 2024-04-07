@@ -46,7 +46,7 @@ class Optimizer:
             self.mobTable = pd.read_pickle('data/allthemobs.pkl')
         else:
             print("WHAT 3")
-            #self.mobTable = MobClass.generateMobs()
+            self.mobTable = MobClass.generateMobs()
         
         tables = self.restrictTableToInputtedParameters()
         self.gearTable = tables[0]

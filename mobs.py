@@ -5,7 +5,6 @@ import sqlite3
 import time
 import database
 import pandas as pd
-import numpy as np
 
 FIND_MOB_QUERY = """
 SELECT * FROM mobs
