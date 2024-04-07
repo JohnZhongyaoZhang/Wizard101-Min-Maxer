@@ -12,8 +12,9 @@ import os
 class Optimizer:
     def __init__(self):
         self.level = 170
-        self.school = "Life"
-        self.target = "Outgoing Healing"
+        self.levellowerbound = 160
+        self.school = "Fire"
+        self.target = "Effective Damage"
         self.dualschooling = False
         #self.spells = []
         self.deckathalon = True
@@ -21,7 +22,6 @@ class Optimizer:
         self.schoolList = ['Fire', 'Ice', 'Storm', 'Balance', 'Life', 'Myth', 'Death', 'Shadow', 'Moon']
         self.universalstats= ['Damage','Accuracy','Pierce','Resist','Crit Rating','Block Rating', 'Pip Conversion Rating']
         self.baseaccuracy = dict(zip(self.schoolList, [70,75,65,80,85,75,80,100,100]))
-        #self.thresholds = {"Power Pip Chance": 100, "Myth Accuracy": 100 - self.baseaccuracy['Myth']}
         self.thresholds = {}
         self.gearTable = None
         self.setTable = None
@@ -33,19 +33,19 @@ class Optimizer:
         if os.path.exists('data/allthegear.pkl'):
             self.gearTable = pd.read_pickle('data/allthegear.pkl')
         else:
-            print("WHAT 1")
+            ("Gear table not found, creating gear table")
             self.gearTable = GeneratorClass.generateGear()
 
         if os.path.exists('data/allthesets.pkl'):
             self.setTable = pd.read_pickle('data/allthesets.pkl')
         else:
-            print("WHAT 2")
+            ("Set bonus table not found, creating set bonus table")
             self.setTable = GeneratorClass.generateAllSets()
         
         if os.path.exists('data/allthemobs.pkl'):
             self.mobTable = pd.read_pickle('data/allthemobs.pkl')
         else:
-            print("WHAT 3")
+            print("Mob table not found, creating mob table")
             self.mobTable = MobClass.generateMobs()
         
         tables = self.restrictTableToInputtedParameters()
@@ -57,6 +57,7 @@ class Optimizer:
         filteredGearTable = self.gearTable[~(self.gearTable["School"] == masterystring)]
         filteredGearTable = filteredGearTable[(filteredGearTable["School"] == self.school) | (filteredGearTable["School"] == "Universal")]
         filteredGearTable = filteredGearTable[(filteredGearTable["Level"] <= self.level)]
+        filteredGearTable = filteredGearTable[(filteredGearTable["Level"] >= self.levellowerbound)]
         if self.deckathalon == False:
             filteredGearTable = filteredGearTable[~((filteredGearTable['Kind'] == "Deck") & (filteredGearTable["Max Spells"] == 0))]
         filteredSetTable = self.setTable
@@ -70,8 +71,6 @@ class Optimizer:
         print(f"Optimizing {self.target}")
         print("Note: sets not fully implemented, manual arithmetic done to get true optimal setup")
         total = 0
-
-        #print(self.gearTable[self.gearTable['Kind'] == "Mount"])
 
         for itemtype in self.kindsconsidered:
             considered = self.gearTable[(self.gearTable["Kind"] == itemtype)]
@@ -136,9 +135,10 @@ class Optimizer:
     
     def removeSuboptimalItems(self):
         savedStats = self.getNeededStats()
+        newFrame = pd.DataFrame()
         for itemtype in self.kindsconsidered:
             for stat in savedStats:
-                considered = self.gearTable[(self.gearTable["Kind"] == itemtype)]
+                considered = self.gearTable[(self.gearTable["Kind"] == itemtype)].copy(deep=True)
                 if len(considered) == 0:
                     print(f"Any {itemtype} 0.0")
                 else:
@@ -147,10 +147,13 @@ class Optimizer:
                     if max_row[stat] == 0:
                         print(f"Any {itemtype} 0.0")
                     else:
-                        print(max_row[['Name','Display','Kind','Level',stat]])
-                        mask = (considered[savedStats] <= max_row[savedStats]).all(axis=1)
-                        copeOutput = considered[~mask]
-                        print(copeOutput)
+                        print("Piece: " +itemtype+ " Stat: " +str(stat)+ " Shape: " +str(considered.shape))
+                        condition = (considered[savedStats] >= max_row[savedStats]).all(axis=1)
+                        useful = considered[condition]
+                        print("Piece: " +itemtype+ " Stat: " +str(stat)+ " Shape: " +str(useful.shape))
+                        print(useful)
+                        newFrame = pd.concat([newFrame,useful])
+        print(newFrame)
 
     def combinationChecker(self):
         itemsByKind = []
@@ -170,10 +173,10 @@ def main():
     TheOptimizer = Optimizer()
     TheOptimizer.generateTables()
     
-    #TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
+    TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
     
-    #TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems()
+    TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems()
 
-    TheOptimizer.maximizeOneStat()
+    #TheOptimizer.maximizeOneStat()
     quit()
 main()
