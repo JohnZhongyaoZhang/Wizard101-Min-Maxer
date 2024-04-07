@@ -12,9 +12,9 @@ import os
 class Optimizer:
     def __init__(self):
         self.level = 170
-        self.levellowerbound = 160
-        self.school = "Fire"
-        self.target = "Effective Damage"
+        self.levellowerbound = 0
+        self.school = "Ice"
+        self.target = "Effective Health"
         self.dualschooling = False
         #self.spells = []
         self.deckathalon = True
@@ -148,6 +148,7 @@ class Optimizer:
                         print(f"Any {itemtype} 0.0")
                     else:
                         print("Piece: " +itemtype+ " Stat: " +str(stat)+ " Shape: " +str(considered.shape))
+                        otherStats = [s for s in savedStats if s != stat]
                         condition = (considered[savedStats] >= max_row[savedStats]).all(axis=1)
                         useful = considered[condition]
                         print("Piece: " +itemtype+ " Stat: " +str(stat)+ " Shape: " +str(useful.shape))
