@@ -5,13 +5,13 @@ class WizMath:
         self.mode = mode
         match self.mode:
             case "PvE":
-                self.dk0, self.dn0, self.dL = 220, 0, 225
+                self.dk0, self.dn0, self.dL = 237, 0, 250
                 self.rk0, self.rn0, self.rL = 120, -20, 125
                 self.crit = "PvE"
                 self.incoming = True
             case "Premiere League":
-                self.dk0, self.dn0, self.dL = 183, 0, 188
-                self.rk0, self.rn0, self.rL = 64, 0, 69
+                self.dk0, self.dn0, self.dL = 207, 0, 212
+                self.rk0, self.rn0, self.rL = 94, 0, 99
                 self.crit = "PvP"
                 self.incoming = False
             case "Raid":

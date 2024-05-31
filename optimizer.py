@@ -12,17 +12,21 @@ import os
 class Optimizer:
     def __init__(self):
         self.level = 170
-        self.levellowerbound = 0
+        self.levellowerbound = 160
         self.school = "Ice"
-        self.target = "Effective Health"
-        self.dualschooling = False
+        self.target = "Ice Damage"
         #self.spells = []
-        self.deckathalon = True
-        self.kindsconsidered = ["Hat", "Robe", "Shoes", "Weapon", "Athame", "Amulet", "Ring", "Deck", "Mount"]
+
+        self.deckaDeckAllowed = True
+        self.PvPOnlyAllowed = False
+        self.universalGearAllowed = False
+
+        #self.kindsconsidered = ["Hat", "Robe", "Shoes", "Weapon", "Athame", "Amulet", "Ring", "Deck", "Mount"]
+        self.kindsconsidered = ["Hat", "Robe", "Shoes", "Weapon", "Athame", "Amulet", "Ring", "Deck"]
         self.schoolList = ['Fire', 'Ice', 'Storm', 'Balance', 'Life', 'Myth', 'Death', 'Shadow', 'Moon']
         self.universalstats= ['Damage','Accuracy','Pierce','Resist','Crit Rating','Block Rating', 'Pip Conversion Rating']
         self.baseaccuracy = dict(zip(self.schoolList, [70,75,65,80,85,75,80,100,100]))
-        self.thresholds = {}
+
         self.gearTable = None
         self.setTable = None
         self.mobTable = None
@@ -55,15 +59,20 @@ class Optimizer:
     def restrictTableToInputtedParameters(self):
         masterystring = f"All schools except {self.school}"
         filteredGearTable = self.gearTable[~(self.gearTable["School"] == masterystring)]
-        filteredGearTable = filteredGearTable[(filteredGearTable["School"] == self.school) | (filteredGearTable["School"] == "Universal")]
+        if self.universalGearAllowed:
+            filteredGearTable = filteredGearTable[(filteredGearTable["School"] == self.school) | (filteredGearTable["School"] == "Universal")]
+        else:
+            filteredGearTable = filteredGearTable[filteredGearTable["School"] == self.school]
         filteredGearTable = filteredGearTable[(filteredGearTable["Level"] <= self.level)]
         filteredGearTable = filteredGearTable[(filteredGearTable["Level"] >= self.levellowerbound)]
-        if self.deckathalon == False:
+        if self.deckaDeckAllowed == False:
             filteredGearTable = filteredGearTable[~((filteredGearTable['Kind'] == "Deck") & (filteredGearTable["Max Spells"] == 0))]
+        if self.PvPOnlyAllowed == False:
+            filteredGearTable = filteredGearTable[~(filteredGearTable["-100% Max Mana"] != 0)]
         filteredSetTable = self.setTable
         if self.target in filteredGearTable.columns.tolist() and self.target not in self.setTable.columns.tolist():
             filteredSetTable[self.target] = 0
-        return filteredGearTable, filteredSetTable 
+        return filteredGearTable, filteredSetTable
 
     def maximizeOneStat(self):
         print(f"{self.school} school")
@@ -107,8 +116,6 @@ class Optimizer:
             savedStats = ['Health', 'Resist', 'Block Rating']
         else:
             savedStats = [self.target]
-        if len(self.thresholds) > 0:
-            savedStats.extend(list(self.thresholds.keys()))
         
         return savedStats
 
@@ -133,6 +140,7 @@ class Optimizer:
         # Only keep pieces that can be part of the optimal solution
         return optimalGearTable
     
+    # Deprecating this method temporarily because it's harder to implement than I thought it would
     def removeSuboptimalItems(self):
         savedStats = self.getNeededStats()
         newFrame = pd.DataFrame()
@@ -147,6 +155,7 @@ class Optimizer:
                     if max_row[stat] == 0:
                         print(f"Any {itemtype} 0.0")
                     else:
+                        # FIX THIS METHOD
                         print("Piece: " +itemtype+ " Stat: " +str(stat)+ " Shape: " +str(considered.shape))
                         otherStats = [s for s in savedStats if s != stat]
                         condition = (considered[savedStats] >= max_row[savedStats]).all(axis=1)
@@ -154,7 +163,66 @@ class Optimizer:
                         print("Piece: " +itemtype+ " Stat: " +str(stat)+ " Shape: " +str(useful.shape))
                         print(useful)
                         newFrame = pd.concat([newFrame,useful])
-        print(newFrame)
+        return newFrame
+
+    # This is a hardcoded method to prune setups involving pieces with jewel combinations that are so bad that they couldn't possibly be part of an optimal PvP setup
+    # Turn this method off if the focus is not looking for a setup that can trade hits
+    def removeBadSockets(self):
+        tempTable = self.gearTable.copy(deep=True)
+        usefulJewels = ['Square', "Circle", "Triangle"]
+        socketedPieces = ['Athame', 'Ring', 'Amulet', 'Deck']
+
+        def countUsefulJewels(jewelString):
+            if type(jewelString) != str:
+                return 0
+            jewels = jewelString.split('|')
+            return sum(jewels.count(jewel) for jewel in usefulJewels)
+        
+        athameMask = (tempTable['Kind'] == "Athame") & (tempTable['Jewels'].apply(countUsefulJewels) >= 3)
+        ringMask = (tempTable['Kind'] == "Ring") & (tempTable['Jewels'].apply(countUsefulJewels) >= 2)
+        amuletMask = (tempTable['Kind'] == "Amulet") & (tempTable['Jewels'].apply(countUsefulJewels) >= 2)
+        deckMask = (tempTable['Kind'] == "Deck") & (tempTable['Jewels'].apply(countUsefulJewels) >= 1)
+
+        finalMask = athameMask | ringMask | amuletMask | deckMask
+        tempTable = tempTable[finalMask | (~tempTable['Kind'].isin(socketedPieces))]
+
+        return tempTable
+
+    # This is a hardcoded method to prune setups involving pieces without optimal shad rating
+    # Turn this method off if the focus is not looking for a setup with high shad rating
+    def getShadPieces(self):
+        mainPieces = ["Hat", "Robe", "Boots", "Weapon"]
+        tempTable = self.gearTable.copy(deep=True)
+        finalMask = pd.Series(False, index=tempTable.index)
+
+        for piece in mainPieces:
+            pieceMask = (tempTable['Kind'] == piece) & (tempTable['Shadow Pip Stat Rating'] > 0)
+            finalMask |= pieceMask
+
+        tempTable = tempTable[finalMask | (~tempTable['Kind'].isin(mainPieces))]
+
+
+        return tempTable
+    
+    # This is a hardcoded method to remove warper and masterpiece pieces from the gear pool at level 160 and 170
+    def getTopTierPieces(self):
+        tempTable = self.gearTable.copy(deep=True)
+        tempTable = tempTable[~tempTable['Display'].str.contains("Masterpiece")]
+        tempTable = tempTable[~tempTable['Display'].str.contains("Warper")]
+
+        return tempTable
+
+    def combinationCreator(self):
+        alltheitems = []
+        for kind in self.kindsconsidered:
+            considered = self.gearTable[(self.gearTable["Kind"] == kind)]
+            names = considered["Name"].tolist()
+            alltheitems.append(names)
+        index = pd.MultiIndex.from_product(alltheitems, names = self.kindsconsidered)
+        index = index.drop_duplicates()
+        combos = pd.DataFrame(index = index).reset_index()
+        print(combos)
+
 
     def combinationChecker(self):
         itemsByKind = []
@@ -174,10 +242,27 @@ def main():
     TheOptimizer = Optimizer()
     TheOptimizer.generateTables()
     
-    TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
-    
-    TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems()
+    TheOptimizer.gearTable, TheOptimizer.setTable = TheOptimizer.restrictTableToInputtedParameters()
 
+
+    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Hat"])
+
+    #TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
+    TheOptimizer.gearTable = TheOptimizer.getAllUniqueItems()
+    TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
+    TheOptimizer.gearTable = TheOptimizer.getShadPieces()
+    TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
+
+    #print(TheOptimizer.gearTable)
+    print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Shoes"])
+
+    #TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems()
     #TheOptimizer.maximizeOneStat()
+
+    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Hat"])
+    
+    TheOptimizer.combinationChecker()
+    TheOptimizer.combinationCreator()
+
     quit()
 main()
