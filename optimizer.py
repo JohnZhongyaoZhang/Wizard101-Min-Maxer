@@ -3,33 +3,34 @@ from pandas import DataFrame
 import numpy as np
 import pandas as pd
 
-from gear import Gear
-from mobs import Mobs
+from src.gear import Gear
+from src.mobs import Mobs
 
-import database
+import src.database as database
 import os
+
+import time
 
 class Optimizer:
     def __init__(self):
         self.level = 170
         self.levellowerbound = 160
-        self.school = "Ice"
-        self.target = "Ice Damage"
+        self.school = "Fire"
+        self.target = "Fire Damage"
         #self.spells = []
 
         self.deckaDeckAllowed = True
         self.PvPOnlyAllowed = False
-        self.universalGearAllowed = False
+        self.universalGearAllowed = True
 
         #self.kindsconsidered = ["Hat", "Robe", "Shoes", "Weapon", "Athame", "Amulet", "Ring", "Deck", "Mount"]
         self.kindsconsidered = ["Hat", "Robe", "Shoes", "Weapon", "Athame", "Amulet", "Ring", "Deck"]
-        self.schoolList = ['Fire', 'Ice', 'Storm', 'Balance', 'Life', 'Myth', 'Death', 'Shadow', 'Moon']
-        self.universalstats= ['Damage','Accuracy','Pierce','Resist','Crit Rating','Block Rating', 'Pip Conversion Rating']
-        self.baseaccuracy = dict(zip(self.schoolList, [70,75,65,80,85,75,80,100,100]))
 
         self.gearTable = None
         self.setTable = None
         self.mobTable = None
+
+        self.generateTables()
 
     def generateTables(self):
         GeneratorClass = Gear()
@@ -51,7 +52,7 @@ class Optimizer:
         else:
             print("Mob table not found, creating mob table")
             self.mobTable = MobClass.generateMobs()
-        
+            
         tables = self.restrictTableToInputtedParameters()
         self.gearTable = tables[0]
         self.setTable = tables[1]
@@ -65,13 +66,14 @@ class Optimizer:
             filteredGearTable = filteredGearTable[filteredGearTable["School"] == self.school]
         filteredGearTable = filteredGearTable[(filteredGearTable["Level"] <= self.level)]
         filteredGearTable = filteredGearTable[(filteredGearTable["Level"] >= self.levellowerbound)]
+        
         if self.deckaDeckAllowed == False:
             filteredGearTable = filteredGearTable[~((filteredGearTable['Kind'] == "Deck") & (filteredGearTable["Max Spells"] == 0))]
         if self.PvPOnlyAllowed == False:
             filteredGearTable = filteredGearTable[~(filteredGearTable["-100% Max Mana"] != 0)]
         filteredSetTable = self.setTable
-        if self.target in filteredGearTable.columns.tolist() and self.target not in self.setTable.columns.tolist():
-            filteredSetTable[self.target] = 0
+        #if self.target in filteredGearTable.columns.tolist() and self.target not in self.setTable.columns.tolist():
+        #    filteredSetTable[self.target] = 0
         return filteredGearTable, filteredSetTable
 
     def maximizeOneStat(self):
@@ -102,12 +104,17 @@ class Optimizer:
         requiredtraits = [i for i in alltraits if i not in irrelevanttraits]
         newTable = self.gearTable.copy(deep=True)
 
-        newTable.drop_duplicates(subset=requiredtraits, inplace=True, keep='first')
+        newTable.drop_duplicates(subset=requiredtraits, inplace=True, keep="first")
         return newTable
 
     def getNeededStats(self):
         savedStats = []
-        if  "Effective Damage" in self.target:
+        if "PvP" in self.target:
+            effectiveDamage = [self.school + " " + 'Damage', self.school + " " + 'Pierce', self.school + " " + 'Crit Rating']
+            effectiveHealth = ['Health', 'Resist', 'Block Rating']
+            utilities = [self.school+" Pip Conversion Rating", self.school+" Accuracy", "Shadow Pip Stat Rating", "Power Pip Chance"]
+            savedStats = effectiveDamage + effectiveHealth + utilities
+        elif "Effective Damage" in self.target:
             if self.school != "Universal":
                 savedStats = [self.school + " " + 'Damage', self.school + " " + 'Pierce', self.school + " " + 'Crit Rating']
             else:
@@ -116,12 +123,12 @@ class Optimizer:
             savedStats = ['Health', 'Resist', 'Block Rating']
         else:
             savedStats = [self.target]
-        
         return savedStats
 
     def removeUselessItems(self):
         savedStats = self.getNeededStats()
 
+        print(self.gearTable.columns.to_list())
         optimalGearTable = self.gearTable[(self.gearTable[savedStats] != 0).any(axis=1) | (self.gearTable['Set'] != 'None')]
         equippableSets = optimalGearTable['Set'].unique().tolist()
         equippableSets.remove("None")
@@ -201,15 +208,19 @@ class Optimizer:
 
         tempTable = tempTable[finalMask | (~tempTable['Kind'].isin(mainPieces))]
 
-
         return tempTable
     
-    # This is a hardcoded method to remove warper and masterpiece pieces from the gear pool at level 160 and 170
+    # This is a hardcoded method to remove suboptimal from the gear pool at level 160 and 170
     def getTopTierPieces(self):
         tempTable = self.gearTable.copy(deep=True)
+        
+        #tempTable = tempTable[tempTable['School'] != "Universal"]
+        tempTable = tempTable[tempTable['Extra Flags'].str.contains("No Auction")]
         tempTable = tempTable[~tempTable['Display'].str.contains("Masterpiece")]
+        tempTable = tempTable[~tempTable['Display'].str.contains("City Dweller")]
+        tempTable = tempTable[~tempTable['Display'].str.contains("Enforcer")]
         tempTable = tempTable[~tempTable['Display'].str.contains("Warper")]
-
+        tempTable = tempTable[~tempTable['Display'].str.contains("Manifest")]
         return tempTable
 
     def combinationCreator(self):
@@ -217,12 +228,14 @@ class Optimizer:
         for kind in self.kindsconsidered:
             considered = self.gearTable[(self.gearTable["Kind"] == kind)]
             names = considered["Name"].tolist()
+            if not names:
+                names.append("No " +kind)
             alltheitems.append(names)
         index = pd.MultiIndex.from_product(alltheitems, names = self.kindsconsidered)
         index = index.drop_duplicates()
-        combos = pd.DataFrame(index = index).reset_index()
+        combos = index.to_frame()
         print(combos)
-
+        return combos
 
     def combinationChecker(self):
         itemsByKind = []
@@ -240,29 +253,21 @@ class Optimizer:
         
 def main():
     TheOptimizer = Optimizer()
-    TheOptimizer.generateTables()
     
-    TheOptimizer.gearTable, TheOptimizer.setTable = TheOptimizer.restrictTableToInputtedParameters()
+    #print(TheOptimizer.gearTable)
 
-
-    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Hat"])
+    #TheOptimizer.maximizeOneStat()
 
     #TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
-    TheOptimizer.gearTable = TheOptimizer.getAllUniqueItems()
-    TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
-    TheOptimizer.gearTable = TheOptimizer.getShadPieces()
-    TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
-
-    #print(TheOptimizer.gearTable)
-    print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Shoes"])
+    #TheOptimizer.gearTable = TheOptimizer.getAllUniqueItems()
+    #TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
+    #TheOptimizer.gearTable = TheOptimizer.getShadPieces()
+    #TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
 
     #TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems()
     #TheOptimizer.maximizeOneStat()
-
-    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Hat"])
     
-    TheOptimizer.combinationChecker()
-    TheOptimizer.combinationCreator()
-
+    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Athame"])
     quit()
+
 main()
