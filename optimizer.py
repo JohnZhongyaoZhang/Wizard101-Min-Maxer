@@ -15,11 +15,11 @@ class Optimizer:
     def __init__(self):
         self.level = 170
         self.levellowerbound = 160
-        self.school = "Fire"
-        self.target = "Fire Damage"
+        self.school = "Ice"
+        self.target = "Ice Damage"
         #self.spells = []
 
-        self.deckaDeckAllowed = True
+        self.deckaDeckAllowed = False
         self.PvPOnlyAllowed = False
         self.universalGearAllowed = True
 
@@ -38,13 +38,13 @@ class Optimizer:
         if os.path.exists('data/allthegear.pkl'):
             self.gearTable = pd.read_pickle('data/allthegear.pkl')
         else:
-            ("Gear table not found, creating gear table")
+            print("Gear table not found, creating gear table")
             self.gearTable = GeneratorClass.generateGear()
 
         if os.path.exists('data/allthesets.pkl'):
             self.setTable = pd.read_pickle('data/allthesets.pkl')
         else:
-            ("Set bonus table not found, creating set bonus table")
+            print("Set bonus table not found, creating set bonus table")
             self.setTable = GeneratorClass.generateAllSets()
         
         if os.path.exists('data/allthemobs.pkl'):
@@ -102,10 +102,7 @@ class Optimizer:
         irrelevanttraits = ['Name','Display','Extra Flags','Cards','Maycasts']
         alltraits = self.gearTable.columns
         requiredtraits = [i for i in alltraits if i not in irrelevanttraits]
-        newTable = self.gearTable.copy(deep=True)
-
-        newTable.drop_duplicates(subset=requiredtraits, inplace=True, keep="first")
-        return newTable
+        return self.gearTable.drop_duplicates(subset=requiredtraits, keep="first")
 
     def getNeededStats(self):
         savedStats = []
@@ -253,21 +250,18 @@ class Optimizer:
         
 def main():
     TheOptimizer = Optimizer()
-    
-    #print(TheOptimizer.gearTable)
-
     #TheOptimizer.maximizeOneStat()
 
-    #TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
-    #TheOptimizer.gearTable = TheOptimizer.getAllUniqueItems()
-    #TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
-    #TheOptimizer.gearTable = TheOptimizer.getShadPieces()
-    #TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
+    TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
+    TheOptimizer.gearTable = TheOptimizer.getAllUniqueItems()
+    TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
+    TheOptimizer.gearTable = TheOptimizer.getShadPieces()
+    TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
 
     #TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems()
     #TheOptimizer.maximizeOneStat()
     
-    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Athame"])
+    print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Weapon"])
     quit()
 
 main()

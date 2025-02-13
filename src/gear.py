@@ -237,7 +237,7 @@ class Gear:
                 case 1:
                     if "Flat" in database.translate_stat(a):
                         continue
-                    table.at[i,database.translate_stat(a)] = round(database.unpack_stat_value(b), 2)
+                    table.at[i,database.translate_stat(a)] = round(b, 2)
 
                 # Starting pips
                 case 2:
