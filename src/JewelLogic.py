@@ -6,9 +6,12 @@ class JewelLogic():
         self.school = school
         self.level = level
         self.jewels = jewels
-        self.trianglespecificaccuracy = {15: 2, 25: 3, 35: 4, 45: 5, 55: 6, 65: 7, 75: 8, 85: 9, 95: 10, 105: 11, 115: 12, 125: 13, 135: 14, 145: 15, 155: 16}
-        self.trianglepowerpip = {25: 2, 35: 3, 45: 4, 55: 5, 65: 6, 75: 7, 85: 8, 95: 9, 105: 10}
-        self.triangleuniversalaccuracy = {15: 1, 35: 2, 55: 3, 75: 4, 95: 5, 115: 6, 135: 7}
+        self.jeweldicts = {"Triangle": 
+                          {"School Accuracy": {15: 2, 25: 3, 35: 4, 45: 5, 55: 6, 65: 7, 75: 8, 85: 9, 95: 10, 105: 11, 115: 12, 125: 13, 135: 14, 145: 15, 155: 16},
+                         "Universal Accuracy": {15: 1, 35: 2, 55: 3, 75: 4, 95: 5, 115: 6, 135: 7},
+                         "Power Pip Chance": {25: 2, 35: 3, 45: 4, 55: 5, 65: 6, 75: 7, 85: 8, 95: 9, 105: 10}
+                            }
+                         }
         self.squarehealth = {170: {"Storm": 525, "Fire": 595, "Ice": 735, "Balance": 670, "Myth": 595, "Death": 650, "Life": 775}}
         self.circlepierce = {55: 2, 65: 3, 75: 4, 85: 5, 95: 6}
         self.circledamage = {170: {"Storm": 11, "Fire": 10, "Ice": 9, "Balance": 10, "Myth": 10, "Death": 11, "Life": 9}}

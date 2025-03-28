@@ -5,7 +5,7 @@ class WizMath:
         self.mode = mode
         match self.mode:
             case "PvE":
-                self.dk0, self.dn0, self.dL = 237, 0, 250
+                self.dk0, self.dn0, self.dL = 237, 0, 247
                 self.rk0, self.rn0, self.rL = 120, -20, 125
                 self.crit = "PvE"
                 self.incoming = True
@@ -115,6 +115,8 @@ class WizMath:
     def effectiveMultipllier(self,criticalRating,blockRating, damageRating, resistRating, pierceRating, casterlevel=170,receiverlevel=170):
         return self.effectivecrit(criticalRating,blockRating,casterlevel,receiverlevel) * self.damageMultiplier(damageRating) * self.resistAfterPierceMultiplier(resistRating,pierceRating)
 
+    def punchout(self, wizard1, wizard2, utility=False):
+        
 def main():
     testing = WizMath(mode='PvE')
 main()

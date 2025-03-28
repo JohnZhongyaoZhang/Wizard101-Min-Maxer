@@ -16,6 +16,11 @@ class Wizard:
         }
         self.jewels = {}
         self.pet = None
-     
+        self.stats = {}
+
+    def
+
     def statSummation(self):
+        for piece in self.gear:
+
         

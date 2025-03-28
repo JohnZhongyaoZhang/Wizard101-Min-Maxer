@@ -194,4 +194,5 @@ class wizardStats:
 
 def main():
     woop = wizardStats()
+    print()
 main()
