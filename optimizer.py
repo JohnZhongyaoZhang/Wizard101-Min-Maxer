@@ -14,9 +14,9 @@ import time
 class Optimizer:
     def __init__(self):
         self.level = 170
-        self.levellowerbound = 160
-        self.school = "Ice"
-        self.target = "Ice Damage"
+        self.levellowerbound = 0
+        self.school = "Storm"
+        self.target = "Effective Damage"
         #self.spells = []
 
         self.deckaDeckAllowed = False
@@ -160,7 +160,7 @@ class Optimizer:
                         print(f"Any {itemtype} 0.0")
                     else:
                         # FIX THIS METHOD
-                        print("Piece: " +itemtype+ " Stat: " +str(stat)+ " Shape: " +str(considered.shape))
+                        print("Piece:  " +itemtype+ " Stat: " +str(stat)+ " Shape: " +str(considered.shape))
                         otherStats = [s for s in savedStats if s != stat]
                         condition = (considered[savedStats] >= max_row[savedStats]).all(axis=1)
                         useful = considered[condition]
@@ -168,6 +168,35 @@ class Optimizer:
                         print(useful)
                         newFrame = pd.concat([newFrame,useful])
         return newFrame
+    
+    def removeSuboptimalItems2(self):
+        savedStats = self.getNeededStats()
+        optimalItems = pd.DataFrame(columns=self.gearTable.columns)
+        gearTableLevelSorted = self.gearTable.sort_values(by='Level', ascending=False)
+
+        for contendingItemIndex, contendingItem in gearTableLevelSorted.iterrows():
+            optimal = True
+            for optimalItemIndex, optimalItem in optimalItems[optimalItems['Kind'] == contendingItem['Kind']].iterrows():
+                for stat in savedStats:
+                    if optimalItem[stat] > contendingItem[stat]:
+                        optimal = False
+                        break
+
+            if optimal:
+                pruned = True
+                for potentiallySuboptimalItemIndex, potentiallySuboptimalItem in optimalItems[optimalItems['Kind'] == contendingItem['Kind']].iterrows():
+                    for stat in savedStats:
+                        if contendingItem[stat] < potentiallySuboptimalItem[stat]:
+                            pruned = False
+                            break
+                    if pruned:
+                        print("Pruned!")
+                        optimalItems.drop(potentiallySuboptimalItemIndex, inplace=True)
+                optimalItems.loc[contendingItemIndex] = contendingItem
+        
+        print(optimalItems)
+                
+                
 
     # This is a hardcoded method to prune setups involving pieces with jewel combinations that are so bad that they couldn't possibly be part of an optimal PvP setup
     # Turn this method off if the focus is not looking for a setup that can trade hits
@@ -254,14 +283,14 @@ def main():
 
     TheOptimizer.gearTable = TheOptimizer.removeUselessItems()
     TheOptimizer.gearTable = TheOptimizer.getAllUniqueItems()
-    TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
-    TheOptimizer.gearTable = TheOptimizer.getShadPieces()
-    TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
+    #TheOptimizer.gearTable = TheOptimizer.removeBadSockets()
+    #TheOptimizer.gearTable = TheOptimizer.getShadPieces()
+    #TheOptimizer.gearTable = TheOptimizer.getTopTierPieces()
 
-    #TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems()
+    TheOptimizer.gearTable = TheOptimizer.removeSuboptimalItems2()
     #TheOptimizer.maximizeOneStat()
     
-    print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Weapon"])
+    #print(TheOptimizer.gearTable[TheOptimizer.gearTable['Kind'] == "Weapon"])
     quit()
 
 main()

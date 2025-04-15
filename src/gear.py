@@ -196,13 +196,13 @@ class Gear:
             attributes = self.fetch_item_attributes(id)
             if attributes != {}:
                 importantIDs.append(attributes)
-            else:
-                print(id)
+            #else:
+            #    print(id)
         
         table = pd.DataFrame.from_dict(importantIDs)
-        table['Set'].fillna('None',inplace=True)
-        table['Jewels'].fillna('None',inplace=True)
-        table['Extra Flags'].fillna('None',inplace=True)
+        table['Set'] = table['Set'].fillna('None')
+        table['Jewels'] = table['Jewels'].fillna('None')
+        table['Extra Flags'] = table['Extra Flags'].fillna('None')
         table.fillna(0,inplace=True)
 
         for stat in self.universalstats:

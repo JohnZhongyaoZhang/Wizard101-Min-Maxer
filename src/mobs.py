@@ -143,11 +143,11 @@ class Mobs:
             attributes = self.fetch_mob_attributes(id)
             if attributes != {}:
                 importantIDs.append(attributes)
-            else:
-                print(id)
+            #else:
+            #    print(id)
         
         table = pd.DataFrame.from_dict(importantIDs)
-        table['Secondary School'].fillna('None',inplace=True)
+        table['Secondary School'] = table['Secondary School'].fillna('None')
         table.fillna(0,inplace=True)
 
         for stat in self.universalstats:
